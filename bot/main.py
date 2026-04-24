@@ -115,7 +115,11 @@ def _job_kb(job_id: str) -> InlineKeyboardMarkup | None:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Открыть на сайте",
+                    text="📄 Открыть на сайте",
+                    url=f"{app_url}/jobs/{quote(job_id)}",
+                ),
+                InlineKeyboardButton(
+                    text="✉️ Откликнуться",
                     url=f"{app_url}/jobs/{quote(job_id)}",
                 ),
             ]

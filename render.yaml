@@ -28,3 +28,21 @@ services:
         sync: false
       - key: GROQ_MODEL
         value: llama-3.3-70b-versatile
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+
+  - type: worker
+    name: jumysaq-bot
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: bot
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: API_URL
+        value: "https://jumysaq-api.onrender.com"
+      - key: APP_URL
+        value: "https://jumysaq.vercel.app"

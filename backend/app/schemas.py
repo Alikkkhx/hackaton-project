@@ -45,6 +45,15 @@ class TokenOut(BaseModel):
     user: UserOut
 
 
+class PhoneCodeRequest(BaseModel):
+    phone: str
+
+
+class PhoneCodeVerify(BaseModel):
+    phone: str
+    code: str
+
+
 # ---------- Seeker Profile ----------
 
 
@@ -177,3 +186,16 @@ class TgLinkRequest(BaseModel):
 class TgLinkResponse(BaseModel):
     ok: bool
     subscription_id: str
+
+
+# ---------- AI Improve ----------
+
+
+class ImproveDescriptionRequest(BaseModel):
+    title: str
+    description: str = ""
+    industry: str | None = None
+
+
+class ImproveDescriptionResponse(BaseModel):
+    improved_description: str

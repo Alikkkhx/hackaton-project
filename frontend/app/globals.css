@@ -12,6 +12,7 @@ body {
   color: rgb(var(--foreground));
   background: rgb(var(--background));
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 @layer components {
@@ -20,7 +21,8 @@ body {
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+    min-height: 44px;
   }
   .btn-primary {
     @apply btn bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-400;
@@ -33,7 +35,8 @@ body {
   }
 
   .input {
-    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none transition placeholder:text-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+    @apply w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm outline-none transition placeholder:text-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+    min-height: 44px;
   }
 
   .card {
@@ -54,5 +57,21 @@ body {
   }
   .chip-red {
     @apply chip bg-rose-50 text-rose-700;
+  }
+
+  /* Mobile filter drawer overlay */
+  .filter-backdrop {
+    @apply fixed inset-0 z-50 bg-black/40 backdrop-blur-sm;
+  }
+  .filter-drawer {
+    @apply fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-5 shadow-2xl;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+}
+
+/* Safe area support */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }

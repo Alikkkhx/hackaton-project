@@ -347,6 +347,59 @@ JOBS_TEMPLATES: list[dict] = [
         "skills": ["дисциплина", "физическая работа"],
         "contact": "+7 701 000 01 07",
     },
+    # --- VILLAGE / REGIONAL JOBS ---
+    {
+        "employer": "Aktau Build Group",
+        "title": "Сварщик на трубопровод (Жанаозен)",
+        "industry": "Строительство",
+        "experience": ExperienceLevel.middle,
+        "employment_type": EmploymentType.full_time,
+        "district": None,
+        "salary_min": 450000,
+        "salary_max": 650000,
+        "description": (
+            "Нужен сварщик категории 5+ на ремонт нефтепровода в Жанаозене. "
+            "Вахта 15/15, жильё и питание. Оплата за объём."
+        ),
+        "skills": ["сварка", "трубопровод", "чтение чертежей"],
+        "contact": "+7 701 000 01 02",
+        "city": "Жанаозен",
+    },
+    {
+        "employer": "Ozen Logistics",
+        "title": "Оператор АЗС (Бейнеу)",
+        "industry": "Логистика",
+        "experience": ExperienceLevel.no_exp,
+        "employment_type": EmploymentType.full_time,
+        "district": None,
+        "salary_min": 200000,
+        "salary_max": 270000,
+        "description": (
+            "Заправочная станция на трассе «Бейнеу — Актау». Смены 2/2. "
+            "Обучаем. Жильё есть."
+        ),
+        "skills": ["внимательность", "касса"],
+        "contact": "cargo@ozen.kz",
+        "city": "Бейнеу",
+    },
+    {
+        "employer": "KidsClub Aktau",
+        "title": "Преподаватель робототехники (Курык)",
+        "industry": "Образование",
+        "experience": ExperienceLevel.junior,
+        "employment_type": EmploymentType.part_time,
+        "district": None,
+        "salary_min": 180000,
+        "salary_max": 280000,
+        "description": (
+            "Ведёшь кружок робототехники для детей 8-14 лет в Курыке. "
+            "2 раза в неделю, выезд из Актау компенсируется. "
+            "Нужен ноутбук и знание Arduino."
+        ),
+        "skills": ["Arduino", "робототехника", "работа с детьми"],
+        "contact": "hr@kidsclub-aktau.kz",
+        "city": "Курык",
+    },
     # Scam-looking
     {
         "employer": "Неизвестная вакансия",
@@ -472,7 +525,7 @@ def seed():
                 title=t["title"],
                 description=t["description"],
                 industry=t["industry"],
-                city="Aktau",
+                city=t.get("city", "Aktau"),
                 district=t["district"],
                 employment_type=t["employment_type"],
                 experience=t["experience"],

@@ -2,29 +2,37 @@
 
 import { useEffect, useState } from "react";
 import { api, getStoredUser } from "@/lib/api";
-import type { SeekerProfile } from "@/lib/types";
-import { AKTAU_DISTRICTS } from "@/lib/format";
-import { Loader2, Save, Sparkles } from "lucide-react";
+import type { SeekerProfile, User } from "@/lib/types";
+import { AKTAU_DISTRICTS, MANGYSTAU_CITIES } from "@/lib/format";
+import { BadgeCheck, Loader2, Phone, Save, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<SeekerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [skillsInput, setSkillsInput] = useState("");
 
+  // Phone verification
+  const [codeSent, setCodeSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [verifyMsg, setVerifyMsg] = useState<string | null>(null);
+
   useEffect(() => {
-    const user = getStoredUser();
-    if (!user) {
+    const u = getStoredUser();
+    if (!u) {
       router.push("/login?next=/profile");
       return;
     }
-    if (user.role !== "seeker") {
+    if (u.role !== "seeker") {
       router.push("/employer");
       return;
     }
+    setUser(u);
     api
       .getSeekerProfile()
       .then((p) => {
@@ -53,6 +61,44 @@ export default function ProfilePage() {
     }
   };
 
+  const requestCode = async () => {
+    if (!user?.phone) return;
+    setVerifying(true);
+    setVerifyMsg(null);
+    try {
+      const res = await api.requestPhoneCode(user.phone);
+      setCodeSent(true);
+      setVerifyMsg(res.message);
+    } catch (e: any) {
+      setVerifyMsg(e.message);
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const verifyCode = async () => {
+    if (!user?.phone || !otpCode) return;
+    setVerifying(true);
+    setVerifyMsg(null);
+    try {
+      await api.verifyPhone(user.phone, otpCode);
+      setVerifyMsg("✅ Телефон подтверждён!");
+      setUser({ ...user, phone_verified: true });
+      // Update stored user
+      const stored = getStoredUser();
+      if (stored) {
+        stored.phone_verified = true;
+        localStorage.setItem("jumysaq_user", JSON.stringify(stored));
+      }
+    } catch (e: any) {
+      setVerifyMsg(e.message);
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const isAktau = !profile?.city || profile.city === "Актау" || profile.city === "Aktau";
+
   if (loading || !profile)
     return (
       <div className="flex h-60 items-center justify-center">
@@ -67,7 +113,66 @@ export default function ProfilePage() {
         Чем точнее профиль, тем лучше AI подбирает вакансии.
       </p>
 
-      <div className="card mt-6 space-y-4">
+      {/* Phone verification card */}
+      {user && user.phone && !user.phone_verified && (
+        <div className="card mt-4 border-amber-200 bg-amber-50/50">
+          <div className="flex items-center gap-2 text-sm font-medium text-amber-800">
+            <Phone className="h-4 w-4" />
+            Подтвердите номер телефона
+          </div>
+          <p className="mt-1 text-xs text-amber-700">
+            Подтверждённый номер повышает доверие к вашему профилю.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+            {!codeSent ? (
+              <button
+                onClick={requestCode}
+                disabled={verifying}
+                className="btn-primary text-sm"
+              >
+                {verifying ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  "Отправить код"
+                )}
+              </button>
+            ) : (
+              <>
+                <input
+                  className="input w-32"
+                  placeholder="Код"
+                  maxLength={4}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                />
+                <button
+                  onClick={verifyCode}
+                  disabled={verifying || otpCode.length < 4}
+                  className="btn-primary text-sm"
+                >
+                  {verifying ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    "Подтвердить"
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+          {verifyMsg && (
+            <p className="mt-2 text-xs text-amber-800">{verifyMsg}</p>
+          )}
+        </div>
+      )}
+
+      {user && user.phone_verified && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+          <BadgeCheck className="h-4 w-4" />
+          Телефон подтверждён
+        </div>
+      )}
+
+      <div className="card mt-4 space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium">
             Краткое описание (кто ты, что умеешь)
@@ -95,6 +200,22 @@ export default function ProfilePage() {
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
+            <label className="mb-1 block text-sm font-medium">Город</label>
+            <select
+              className="input"
+              value={profile.city}
+              onChange={(e) =>
+                setProfile({ ...profile, city: e.target.value, district: null })
+              }
+            >
+              {MANGYSTAU_CITIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <label className="mb-1 block text-sm font-medium">Район</label>
             <select
               className="input"
@@ -105,13 +226,15 @@ export default function ProfilePage() {
                   district: e.target.value || null,
                 })
               }
+              disabled={!isAktau}
             >
               <option value="">—</option>
-              {AKTAU_DISTRICTS.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
+              {isAktau &&
+                AKTAU_DISTRICTS.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -151,7 +274,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button onClick={save} disabled={saving} className="btn-primary">
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />

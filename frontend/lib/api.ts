@@ -90,6 +90,19 @@ export const api = {
 
   me: () => request<User>("/api/users/me"),
 
+  // phone verification
+  requestPhoneCode: (phone: string) =>
+    request<{ ok: boolean; message: string }>("/api/auth/request-phone-code", {
+      method: "POST",
+      body: JSON.stringify({ phone }),
+    }),
+
+  verifyPhone: (phone: string, code: string) =>
+    request<{ ok: boolean; phone_verified: boolean }>("/api/auth/verify-phone", {
+      method: "POST",
+      body: JSON.stringify({ phone, code }),
+    }),
+
   // seeker profile
   getSeekerProfile: () =>
     request<SeekerProfile>("/api/users/me/seeker-profile"),
@@ -126,6 +139,13 @@ export const api = {
   myJobs: () => request<Job[]>("/api/jobs/mine/all"),
   deleteJob: (id: string) =>
     request<void>(`/api/jobs/${id}`, { method: "DELETE" }),
+
+  // AI improve description
+  improveDescription: (payload: { title: string; description: string; industry?: string }) =>
+    request<{ improved_description: string }>("/api/jobs/improve-description", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
   // applications
   apply: (payload: { job_id: string; cover_letter: string }) =>

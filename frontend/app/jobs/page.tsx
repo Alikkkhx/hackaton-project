@@ -16,6 +16,7 @@ export default function JobsPage() {
   const params = useMemo(
     () => ({
       q: filters.q,
+      city: filters.city,
       district: filters.district,
       industry: filters.industry,
       employment_type: filters.employment_type,

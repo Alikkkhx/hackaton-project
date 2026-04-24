@@ -17,11 +17,21 @@ from app.models import (
     User,
     UserRole,
 )
-from app.schemas import JobCreate, JobOut
+from app.schemas import ImproveDescriptionRequest, ImproveDescriptionResponse, JobCreate, JobOut
 from app.security import get_current_user
 from app.services import ai, embeddings, notifications
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
+
+
+@router.post("/improve-description", response_model=ImproveDescriptionResponse)
+def improve_description(payload: ImproveDescriptionRequest, user: User = Depends(get_current_user)):
+    """AI-powered vacancy text polish using existing ai.polish_job_description."""
+    if not payload.title and not payload.description:
+        raise HTTPException(400, "Укажите хотя бы заголовок или описание")
+    raw = payload.description or payload.title
+    improved = ai.polish_job_description(payload.title or "", raw)
+    return ImproveDescriptionResponse(improved_description=improved)
 
 
 def _to_job_out(job: Job, db: Session) -> JobOut:
