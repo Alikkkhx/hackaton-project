@@ -1,5 +1,10 @@
-"""Groq LLM wrapper + AI-powered features: match explanations, scam detection,
-job description polish."""
+"""LLM wrapper + AI-powered features: match explanations, scam detection,
+job description polish.
+
+Provider priority: Gemini (Google AI Studio) -> Groq -> empty (rule fallback).
+The first provider with a configured API key is used; on HTTP error the next
+one is tried, so the app keeps working if the primary LLM misbehaves.
+"""
 
 from __future__ import annotations
 
@@ -12,34 +17,73 @@ from app.config import get_settings
 log = logging.getLogger(__name__)
 
 
-def _client():
-    from groq import Groq
+def llm_available() -> bool:
+    s = get_settings()
+    return bool(s.gemini_api_key or s.groq_api_key)
 
+
+def _complete_gemini(
+    system: str, user: str, *, json_mode: bool, max_tokens: int
+) -> str | None:
+    settings = get_settings()
+    if not settings.gemini_api_key:
+        return None
+    try:
+        import google.generativeai as genai
+
+        genai.configure(api_key=settings.gemini_api_key)
+        generation_config: dict = {
+            "temperature": 0.2,
+            "max_output_tokens": max_tokens,
+        }
+        if json_mode:
+            generation_config["response_mime_type"] = "application/json"
+        model = genai.GenerativeModel(
+            model_name=settings.gemini_model,
+            system_instruction=system,
+            generation_config=generation_config,
+        )
+        resp = model.generate_content(user)
+        return (resp.text or "").strip()
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Gemini call failed: %s", exc)
+        return None
+
+
+def _complete_groq(
+    system: str, user: str, *, json_mode: bool, max_tokens: int
+) -> str | None:
     settings = get_settings()
     if not settings.groq_api_key:
-        raise RuntimeError("GROQ_API_KEY is not configured")
-    return Groq(api_key=settings.groq_api_key)
+        return None
+    try:
+        from groq import Groq
+
+        client = Groq(api_key=settings.groq_api_key)
+        kwargs: dict = dict(
+            model=settings.groq_model,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            temperature=0.2,
+            max_tokens=max_tokens,
+        )
+        if json_mode:
+            kwargs["response_format"] = {"type": "json_object"}
+        resp = client.chat.completions.create(**kwargs)
+        return (resp.choices[0].message.content or "").strip()
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Groq call failed: %s", exc)
+        return None
 
 
 def _complete(system: str, user: str, *, json_mode: bool = False, max_tokens: int = 600) -> str:
-    settings = get_settings()
-    kwargs = dict(
-        model=settings.groq_model,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        temperature=0.2,
-        max_tokens=max_tokens,
-    )
-    if json_mode:
-        kwargs["response_format"] = {"type": "json_object"}
-    try:
-        resp = _client().chat.completions.create(**kwargs)
-        return resp.choices[0].message.content or ""
-    except Exception as exc:  # noqa: BLE001
-        log.warning("Groq call failed: %s", exc)
-        return ""
+    for provider in (_complete_gemini, _complete_groq):
+        out = provider(system, user, json_mode=json_mode, max_tokens=max_tokens)
+        if out:
+            return out
+    return ""
 
 
 # ---------- Job description polish (optional UX) ----------
@@ -111,8 +155,7 @@ def evaluate_scam(title: str, description: str, salary_max: int | None = None) -
     """Combine heuristic + LLM scores. Returns (risk_score 0..1, reasons)."""
     h_score, h_reasons = heuristic_scam_score(f"{title}\n{description}")
 
-    settings = get_settings()
-    if settings.groq_api_key:
+    if llm_available():
         try:
             l_score, l_reasons = llm_scam_score(title, description, salary_max)
         except Exception:  # noqa: BLE001
