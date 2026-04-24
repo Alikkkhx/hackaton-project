@@ -17,7 +17,7 @@
 ## Решение
 
 1. **Единая лента вакансий** — все предложения из Актау и сёл в одном месте, с нормальными описаниями (AI дотягивает текст до читаемого).
-2. **AI-матчинг** — эмбеддинги профиля соискателя сопоставляются с эмбеддингами вакансий, Groq Llama-3.3 объясняет, почему вакансия подходит.
+2. **AI-матчинг** — эмбеддинги профиля соискателя сопоставляются с эмбеддингами вакансий, Google Gemini 2.5 объясняет живым текстом, почему вакансия подходит (упоминает конкретные навыки и район).
 3. **AI анти-скам** — каждая новая вакансия проходит проверку LLM на признаки мошенничества («лёгкие деньги», «оплата картой», «без собеседования»).
 4. **Верификация работодателя** — подтверждение по телефону + ручная галочка «verified».
 5. **Telegram-бот** — мгновенные уведомления о новых вакансиях под профиль и быстрый отклик прямо из чата.
@@ -41,8 +41,10 @@
      └──────────────────┘
 
   AI layer:
-  - Groq (Llama-3.3-70B) — генерация, ранжирование, scam-детект
-  - sentence-transformers — локальные эмбеддинги (бесплатно)
+  - Google Gemini 2.5 Flash Lite — генерация объяснений, scam-детект (основной)
+  - Groq Llama-3.3-70B — fallback LLM-провайдер
+  - sentence-transformers (multilingual MiniLM) — локальные эмбеддинги
+  - Эвристики по ключевым паттернам — базовый слой анти-скама
 ```
 
 ## Технологии
@@ -50,10 +52,11 @@
 | Слой | Технология |
 |---|---|
 | Frontend | Next.js 14 (App Router), TypeScript, TailwindCSS, shadcn/ui |
-| Backend | Python 3.11, FastAPI, SQLAlchemy 2, Alembic, Pydantic v2 |
-| DB | PostgreSQL (Supabase) |
-| AI LLM | Groq API (Llama-3.3-70B-versatile) |
-| Embeddings | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` |
+| Backend | Python 3.11–3.13, FastAPI, SQLAlchemy 2, Alembic, Pydantic v2 |
+| DB | PostgreSQL (Supabase) в проде / SQLite локально |
+| AI LLM (основной) | Google Gemini API (`gemini-2.5-flash-lite`) |
+| AI LLM (fallback) | Groq API (`llama-3.3-70b-versatile`) |
+| Embeddings | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (опционально) |
 | Telegram | aiogram 3 |
 | Hosting | Vercel (web) + Render/Railway (api + bot) + Supabase (db) |
 
@@ -61,7 +64,7 @@
 
 ```
 hackaton-project/
-├── backend/        # FastAPI + SQLAlchemy + Groq
+├── backend/        # FastAPI + SQLAlchemy + Gemini/Groq
 ├── frontend/       # Next.js 14 (App Router)
 ├── bot/            # Telegram-бот на aiogram 3
 ├── docs/           # питч-материалы
@@ -85,7 +88,7 @@ python -m venv .venv
 . .venv/Scripts/activate     # Windows
 # source .venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
-copy .env.example .env       # заполнить DATABASE_URL, GROQ_API_KEY
+copy .env.example .env       # заполнить DATABASE_URL и GEMINI_API_KEY (или GROQ_API_KEY)
 alembic upgrade head
 python -m app.seed            # заливает демо-вакансии Актау
 uvicorn app.main:app --reload
@@ -113,6 +116,27 @@ pip install -r requirements.txt
 copy .env.example .env        # BOT_TOKEN, API_URL
 python main.py
 ```
+
+## Переменные окружения
+
+**`backend/.env`**
+
+| Переменная | Назначение | Пример |
+|---|---|---|
+| `DATABASE_URL` | строка подключения SQLAlchemy | `sqlite:///./jumysaq.db` / `postgresql+psycopg://...` |
+| `JWT_SECRET` | секрет для подписи токенов | `change-me` |
+| `GEMINI_API_KEY` | ключ Google AI Studio (основной LLM) | `AIza...` |
+| `GEMINI_MODEL` | модель Gemini | `gemini-2.5-flash-lite` |
+| `GROQ_API_KEY` | ключ Groq (опциональный fallback) | `gsk_...` |
+| `GROQ_MODEL` | модель Groq | `llama-3.3-70b-versatile` |
+
+Если не задан ни один LLM-ключ, AI-слой откатывается на эвристики и шаблонные объяснения — продукт остаётся работоспособным.
+
+**`frontend/.env.local`**
+
+| Переменная | Назначение |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | адрес FastAPI, например `http://localhost:8000` |
 
 ## Что показать на питче
 
