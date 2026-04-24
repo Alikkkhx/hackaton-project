@@ -38,6 +38,12 @@ class Settings(BaseSettings):
         alias="CORS_ORIGINS",
     )
 
+    # Ссылки в Telegram (новая вакансия и т.д.)
+    public_app_url: str = Field(
+        default="http://localhost:3000",
+        alias="PUBLIC_APP_URL",
+    )
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

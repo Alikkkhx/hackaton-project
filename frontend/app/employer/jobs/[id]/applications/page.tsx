@@ -19,6 +19,7 @@ export default function ApplicationsPage() {
   const { id } = useParams<{ id: string }>();
   const [apps, setApps] = useState<ApplicationWithSeeker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -26,19 +27,39 @@ export default function ApplicationsPage() {
       router.push(`/login?next=/employer/jobs/${id}/applications`);
       return;
     }
+    if (user.role !== "employer") {
+      router.push("/");
+      return;
+    }
+    if (!id || typeof id !== "string") {
+      setLoading(false);
+      return;
+    }
+    setError(null);
     api
       .applicationsForJob(id)
       .then(setApps)
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : "Не удалось загрузить отклики";
+        setError(msg);
+        setApps([]);
+      })
       .finally(() => setLoading(false));
   }, [id, router]);
 
   const updateStatus = async (appId: string, status: string) => {
-    const updated = await api.updateApplicationStatus(appId, status);
-    setApps((prev: ApplicationWithSeeker[]) =>
-      prev.map((a: ApplicationWithSeeker) =>
-        a.id === appId ? { ...a, status: updated.status } : a
-      )
-    );
+    try {
+      const updated = await api.updateApplicationStatus(appId, status);
+      setError(null);
+      setApps((prev: ApplicationWithSeeker[]) =>
+        prev.map((a: ApplicationWithSeeker) =>
+          a.id === appId ? { ...a, status: updated.status } : a
+        )
+      );
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Не удалось обновить статус";
+      setError(msg);
+    }
   };
 
   return (
@@ -47,6 +68,12 @@ export default function ApplicationsPage() {
       <p className="text-sm text-gray-500">
         Всего откликов: {apps.length}
       </p>
+
+      {error && (
+        <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex h-40 items-center justify-center text-gray-400">
@@ -84,7 +111,9 @@ export default function ApplicationsPage() {
                     <span>· {formatRelative(a.created_at)}</span>
                   </div>
                 </div>
-                <span className="chip-brand">{STATUS_LABEL[a.status]}</span>
+                <span className="chip-brand">
+                  {STATUS_LABEL[a.status] ?? a.status}
+                </span>
               </div>
 
               {a.cover_letter && (

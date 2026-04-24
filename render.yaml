@@ -1,5 +1,6 @@
 # Render Blueprint (корень репо): Dashboard → Blueprints → New Blueprint Instance
-# После создания введите DATABASE_URL (postgresql+psycopg://...) в Environment сервиса.
+# После деплоя: задайте PUBLIC_APP_URL = URL фронта (Vercel), обновите CORS_ORIGINS тем же URL (+ localhost при отладке).
+# Секреты: DATABASE_URL, GEMINI_API_KEY (желательно), при необходимости GROQ_API_KEY, TELEGRAM_BOT_TOKEN.
 services:
   - type: web
     name: jumysaq-api
@@ -17,6 +18,8 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: "*"
+      - key: PUBLIC_APP_URL
+        value: "https://jumysaq.vercel.app"
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL

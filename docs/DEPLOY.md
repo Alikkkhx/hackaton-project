@@ -12,10 +12,10 @@
    ```
 4. В SQL Editor выполнить (опционально) `create extension if not exists vector;` — на будущее.
 
-## 2. Groq API key
+## 2. LLM-ключи
 
-1. [console.groq.com/keys](https://console.groq.com/keys) → Create API Key.
-2. Скопировать `gsk_...`. Free tier подходит для хакатона.
+1. **Gemini (основной):** [Google AI Studio](https://aistudio.google.com/app/apikey) → API key → в Render как `GEMINI_API_KEY`.
+2. **Groq (опционально, fallback):** [console.groq.com/keys](https://console.groq.com/keys) → `GROQ_API_KEY`.
 
 ## 3. Telegram бот
 
@@ -32,19 +32,19 @@
 
 1. Зарегистрироваться на [render.com](https://render.com/), `New → Blueprint`.
 2. Подключить репозиторий `Alikkkhx/hackaton-project`.
-3. Render увидит `backend/render.yaml` и предложит создать 2 сервиса (api + bot).
-4. Заполнить секреты:
+3. Render подхватит **корневой** `render.yaml` (сервис API `jumysaq-api`). Отдельный worker для бота при необходимости подключите вручную.
+4. Заполнить секреты (минимум):
    | Key | Value |
    |---|---|
    | `DATABASE_URL` | строка из Supabase |
-   | `GROQ_API_KEY` | ключ из Groq |
-   | `TELEGRAM_BOT_TOKEN` | токен из BotFather |
-   | `CORS_ORIGINS` | `https://<ваш-проект>.vercel.app` |
-   | `BOT_TOKEN` (для bot) | тот же токен Telegram |
-   | `API_URL` (для bot) | `https://<ваш-api>.onrender.com` |
-   | `APP_URL` (для bot) | `https://<ваш-проект>.vercel.app` |
-5. Первый деплой выполнит seed автоматически.
-6. Swagger будет доступен: `https://<api>.onrender.com/docs`.
+   | `GEMINI_API_KEY` | ключ Google AI Studio |
+   | `GROQ_API_KEY` | опционально |
+   | `TELEGRAM_BOT_TOKEN` | токен из BotFather (уведомления с API) |
+   | `CORS_ORIGINS` | `https://<ваш-проект>.vercel.app` или временно `*` |
+   | `PUBLIC_APP_URL` | `https://<ваш-проект>.vercel.app` (ссылки в Telegram) |
+   | В папке `bot` при отдельном сервисе: `API_URL`, токен бота — см. `bot/.env.example` |
+5. Демо-данные: один раз локально `python -m app.seed` с тем же `DATABASE_URL` (см. [LAUNCH.md](LAUNCH.md)).
+6. Swagger: `https://<api>.onrender.com/docs`.
 
 ## 5. Frontend — Vercel
 

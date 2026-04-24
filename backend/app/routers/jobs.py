@@ -6,6 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.db import get_db
 from app.models import (
     EmployerProfile,
@@ -76,7 +77,7 @@ async def _notify_subscribers(job_id: str, title: str, city: str, district: str 
     """Fire-and-forget telegram notifications for subscribers matching this job."""
     from app.db import SessionLocal
 
-    app_url = "https://jumysaq.vercel.app"
+    app_url = get_settings().public_app_url.rstrip("/")
     with SessionLocal() as db:
         subs = db.query(TelegramSubscription).filter_by(active=True, city=city).all()
         chat_ids: list[str] = []

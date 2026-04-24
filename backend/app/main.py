@@ -19,10 +19,12 @@ app = FastAPI(
     description="Цифровая платформа занятости для Мангистау (MVP для Mangystau Hackathon).",
 )
 
+# Auth — только Bearer в заголовке, без cookie; allow_credentials=False
+# позволяет использовать CORS_ORIGINS=* на Render до настройки явных origin.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

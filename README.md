@@ -65,7 +65,9 @@
 1. **Supabase:** создайте проект, вставьте `DATABASE_URL` в формате `postgresql+psycopg://user:pass@host:5432/postgres` (драйвер `psycopg`, без квадратных скобок в пароле). Один раз локально: `cd backend && python -m app.seed` (или уже залито).
 2. **Render (API):** [Blueprints → New Blueprint Instance](https://dashboard.render.com/select-repo?type=blueprint), репозиторий `Alikkkhx/hackaton-project`, Render подхватит корневой `render.yaml`. В мастере укажите секрет **`DATABASE_URL`**; при желании **`GEMINI_API_KEY`**. Либо вручную: Web Service → Root `backend`, Python, Build `pip install -r requirements.txt`, Start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 3. **Vercel (сайт):** Import Project → тот же репо, **Root Directory** `frontend`, переменная **`NEXT_PUBLIC_API_URL`** = публичный URL Render (например `https://jumysaq-api.onrender.com`).
-4. В Render обновите **`CORS_ORIGINS`** на URL Vercel (через запятую, если несколько), перезапустите сервис.
+4. В Render задайте **`PUBLIC_APP_URL`** = тот же URL фронта (ссылки в Telegram). Обновите **`CORS_ORIGINS`** на URL Vercel (через запятую, если несколько — включая preview), при необходимости перезапустите сервис.
+
+**Чеклист «до 100%»:** [docs/LAUNCH.md](docs/LAUNCH.md) · **Слайды:** [docs/SLIDES.md](docs/SLIDES.md) · **Смок API:** `.\scripts\smoke.ps1 -ApiUrl "https://ВАШ-API.onrender.com"`
 
 ## Структура репозитория
 
@@ -136,6 +138,9 @@ python main.py
 | `GEMINI_MODEL` | модель Gemini | `gemini-2.5-flash-lite` |
 | `GROQ_API_KEY` | ключ Groq (опциональный fallback) | `gsk_...` |
 | `GROQ_MODEL` | модель Groq | `llama-3.3-70b-versatile` |
+| `CORS_ORIGINS` | origin фронта через запятую или `*` (см. `render.yaml`) | `https://xxx.vercel.app` |
+| `PUBLIC_APP_URL` | публичный URL сайта для ссылок в Telegram | `https://xxx.vercel.app` |
+| `TELEGRAM_BOT_TOKEN` | токен бота (уведомления с API) | опционально |
 
 Если не задан ни один LLM-ключ, AI-слой откатывается на эвристики и шаблонные объяснения — продукт остаётся работоспособным.
 
