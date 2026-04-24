@@ -39,8 +39,8 @@ function RegisterForm() {
       setAuth(res.access_token, res.user);
       window.dispatchEvent(new Event("auth-changed"));
       router.push(role === "employer" ? "/employer" : "/profile");
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Ошибка регистрации");
     } finally {
       setLoading(false);
     }
@@ -152,7 +152,13 @@ function RegisterForm() {
 export default function RegisterPage() {
   return (
     <div className="container-page py-12">
-      <Suspense>
+      <Suspense
+        fallback={
+          <div className="mx-auto flex max-w-md min-h-[24rem] items-center justify-center text-gray-400">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        }
+      >
         <RegisterForm />
       </Suspense>
     </div>
