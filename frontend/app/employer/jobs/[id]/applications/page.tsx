@@ -34,8 +34,8 @@ export default function ApplicationsPage() {
 
   const updateStatus = async (appId: string, status: string) => {
     const updated = await api.updateApplicationStatus(appId, status);
-    setApps((prev) =>
-      prev.map((a) =>
+    setApps((prev: ApplicationWithSeeker[]) =>
+      prev.map((a: ApplicationWithSeeker) =>
         a.id === appId ? { ...a, status: updated.status } : a
       )
     );
@@ -58,7 +58,7 @@ export default function ApplicationsPage() {
         </div>
       ) : (
         <div className="mt-6 grid gap-3">
-          {apps.map((a) => (
+          {apps.map((a: ApplicationWithSeeker) => (
             <div key={a.id} className="card space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -95,7 +95,7 @@ export default function ApplicationsPage() {
 
               {a.seeker_profile?.skills?.length ? (
                 <div className="flex flex-wrap gap-1.5">
-                  {a.seeker_profile.skills.map((s) => (
+                  {a.seeker_profile.skills.map((s: string) => (
                     <span key={s} className="chip">
                       {s}
                     </span>
