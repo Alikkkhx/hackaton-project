@@ -60,6 +60,13 @@
 | Telegram | aiogram 3 |
 | Hosting | Vercel (web) + Render/Railway (api + bot) + Supabase (db) |
 
+## Деплой (без входа в этот ноутбук)
+
+1. **Supabase:** создайте проект, вставьте `DATABASE_URL` в формате `postgresql+psycopg://user:pass@host:5432/postgres` (драйвер `psycopg`, без квадратных скобок в пароле). Один раз локально: `cd backend && python -m app.seed` (или уже залито).
+2. **Render (API):** [Blueprints → New Blueprint Instance](https://dashboard.render.com/select-repo?type=blueprint), репозиторий `Alikkkhx/hackaton-project`, Render подхватит корневой `render.yaml`. В мастере укажите секрет **`DATABASE_URL`**; при желании **`GEMINI_API_KEY`**. Либо вручную: Web Service → Root `backend`, Python, Build `pip install -r requirements.txt`, Start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+3. **Vercel (сайт):** Import Project → тот же репо, **Root Directory** `frontend`, переменная **`NEXT_PUBLIC_API_URL`** = публичный URL Render (например `https://jumysaq-api.onrender.com`).
+4. В Render обновите **`CORS_ORIGINS`** на URL Vercel (через запятую, если несколько), перезапустите сервис.
+
 ## Структура репозитория
 
 ```
