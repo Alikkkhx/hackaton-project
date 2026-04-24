@@ -1,0 +1,55 @@
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Editors ----------
+.idea/
+.vscode/
+*.swp
+
+# ---------- Secrets ----------
+.env
+.env.local
+.env.*.local
+*.pem
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Alembic: keep versions but ignore local SQLite
+backend/*.sqlite3
+backend/*.db
+
+# ---------- Node / Next.js ----------
+node_modules/
+.next/
+out/
+.vercel/
+.turbo/
+coverage/
+next-env.d.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- Misc ----------
+*.log
+.cache/
+tmp/

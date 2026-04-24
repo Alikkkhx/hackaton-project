@@ -1,0 +1,179 @@
+"""Groq LLM wrapper + AI-powered features: match explanations, scam detection,
+job description polish."""
+
+from __future__ import annotations
+
+import json
+import logging
+import re
+
+from app.config import get_settings
+
+log = logging.getLogger(__name__)
+
+
+def _client():
+    from groq import Groq
+
+    settings = get_settings()
+    if not settings.groq_api_key:
+        raise RuntimeError("GROQ_API_KEY is not configured")
+    return Groq(api_key=settings.groq_api_key)
+
+
+def _complete(system: str, user: str, *, json_mode: bool = False, max_tokens: int = 600) -> str:
+    settings = get_settings()
+    kwargs = dict(
+        model=settings.groq_model,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        temperature=0.2,
+        max_tokens=max_tokens,
+    )
+    if json_mode:
+        kwargs["response_format"] = {"type": "json_object"}
+    try:
+        resp = _client().chat.completions.create(**kwargs)
+        return resp.choices[0].message.content or ""
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Groq call failed: %s", exc)
+        return ""
+
+
+# ---------- Job description polish (optional UX) ----------
+
+
+def polish_job_description(title: str, raw: str) -> str:
+    sys = (
+        "Ты — редактор вакансий. Перепиши текст вакансии для платформы труда в "
+        "Мангистау (Казахстан, русский язык). Сделай коротко, по делу, на ты. "
+        "Структура: 1) чем заниматься (3-5 пунктов), 2) что важно (2-4 пункта), "
+        "3) что предлагаем (2-4 пункта). Не добавляй ничего, чего не было в исходнике."
+    )
+    usr = f"Заголовок: {title}\n\nИсходный текст:\n{raw}"
+    out = _complete(sys, usr, max_tokens=500)
+    return out.strip() or raw
+
+
+# ---------- Scam / risk detection ----------
+
+
+_SCAM_HEURISTICS = [
+    (r"быстр\w* деньги|лёгкие деньги|лёгкий заработок", "Обещание лёгкого заработка"),
+    (r"без опыта.*(?:от\s*)?(\d{2,3})\s*000", "Высокая зарплата без опыта"),
+    (r"оплата на карту|предоплата|взнос|депозит|страховочн\w*", "Просьба о предоплате"),
+    (r"whatsapp|вотсап|вайбер|viber|телеграм(?!\s*бот)", "Только мессенджер, без данных компании"),
+    (r"срочно\s+нужны|набираем\s+всех", "Массовый/срочный набор без требований"),
+    (r"работа на дому.*инвестиц", "Работа на дому + инвестиции"),
+    (r"\b18\+\b|эскорт", "Подозрительный контент"),
+]
+
+
+def heuristic_scam_score(text: str) -> tuple[float, list[str]]:
+    reasons: list[str] = []
+    score = 0.0
+    t = text.lower()
+    for pattern, reason in _SCAM_HEURISTICS:
+        if re.search(pattern, t):
+            reasons.append(reason)
+            score += 0.2
+    return min(score, 1.0), reasons
+
+
+def llm_scam_score(title: str, description: str, salary_max: int | None) -> tuple[float, list[str]]:
+    """Ask Groq to classify job posting risk. Returns (score 0..1, reasons)."""
+    sys = (
+        "Ты — детектор мошеннических вакансий. Верни ТОЛЬКО JSON: "
+        '{"score": <float 0..1>, "reasons": [<string>, ...]}. '
+        "score = вероятность, что вакансия — мошенничество или сомнительная. "
+        "reasons — короткие тезисы на русском, что именно настораживает. "
+        "Оценивай: завышенные обещания, отсутствие компании, работа на дому с инвестициями, "
+        "просьбы о предоплате, только мессенджер без деталей, 'без опыта и документов — высокая ЗП'."
+    )
+    usr = (
+        f"Заголовок: {title}\n"
+        f"Максимальная зарплата: {salary_max}\n"
+        f"Описание:\n{description}\n"
+    )
+    raw = _complete(sys, usr, json_mode=True, max_tokens=300)
+    try:
+        data = json.loads(raw)
+        score = float(data.get("score", 0.0))
+        reasons = [str(r) for r in data.get("reasons", [])][:5]
+        return max(0.0, min(1.0, score)), reasons
+    except Exception:  # noqa: BLE001
+        return 0.0, []
+
+
+def evaluate_scam(title: str, description: str, salary_max: int | None = None) -> tuple[float, list[str]]:
+    """Combine heuristic + LLM scores. Returns (risk_score 0..1, reasons)."""
+    h_score, h_reasons = heuristic_scam_score(f"{title}\n{description}")
+
+    settings = get_settings()
+    if settings.groq_api_key:
+        try:
+            l_score, l_reasons = llm_scam_score(title, description, salary_max)
+        except Exception:  # noqa: BLE001
+            l_score, l_reasons = 0.0, []
+    else:
+        l_score, l_reasons = 0.0, []
+
+    score = max(h_score, l_score)
+    reasons: list[str] = []
+    for r in (*h_reasons, *l_reasons):
+        if r not in reasons:
+            reasons.append(r)
+    return score, reasons[:6]
+
+
+# ---------- Match explanation ----------
+
+
+def explain_match(
+    *,
+    seeker_headline: str,
+    seeker_skills: list[str],
+    seeker_experience: str,
+    seeker_district: str | None,
+    job_title: str,
+    job_skills: list[str],
+    job_experience: str,
+    job_district: str | None,
+    score: float,
+) -> str:
+    """Generate one short sentence why this job matches the seeker."""
+    sys = (
+        "Ты — карьерный консультант в Мангистау. Объясни на русском в 1-2 предложениях, "
+        "почему вакансия подходит соискателю. Пиши на ты, коротко, по делу, без воды. "
+        "Если район совпадает — упомяни это. Не используй markdown, не ставь кавычки."
+    )
+    usr = (
+        f"Соискатель: {seeker_headline or '—'}; навыки: {', '.join(seeker_skills) or '—'}; "
+        f"опыт: {seeker_experience}; район: {seeker_district or '—'}.\n"
+        f"Вакансия: {job_title}; требуемые навыки: {', '.join(job_skills) or '—'}; "
+        f"опыт: {job_experience}; район: {job_district or '—'}.\n"
+        f"Cosine similarity: {score:.2f}."
+    )
+    text = _complete(sys, usr, max_tokens=120).strip()
+    if not text:
+        text = fallback_reason(seeker_skills, job_skills, seeker_district, job_district)
+    return text
+
+
+def fallback_reason(
+    s_skills: list[str], j_skills: list[str], s_district: str | None, j_district: str | None
+) -> str:
+    common = sorted(set(s.lower() for s in s_skills) & set(j.lower() for j in j_skills))
+    parts = []
+    if common:
+        parts.append(f"совпадают навыки: {', '.join(list(common)[:3])}")
+    if s_district and j_district and s_district.lower() == j_district.lower():
+        parts.append(f"тот же район ({s_district})")
+    if not parts:
+        return "Похожая сфера и уровень опыта."
+    return "Подходит: " + "; ".join(parts) + "."
+
+
+_fallback_reason = fallback_reason  # backwards-compat alias

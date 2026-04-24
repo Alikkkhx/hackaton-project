@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "8000:8000"
+
+  bot:
+    build: ./bot
+    environment:
+      BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      API_URL: http://api:8000
+      APP_URL: ${APP_URL:-http://localhost:3000}
+    depends_on:
+      - api
