@@ -107,8 +107,10 @@ def _job_caption(job: dict) -> str:
     )
 
 
-def _job_kb(job_id: str) -> InlineKeyboardMarkup:
+def _job_kb(job_id: str) -> InlineKeyboardMarkup | None:
     app_url = get_settings().app_url.rstrip("/")
+    if "localhost" in app_url or "127.0.0.1" in app_url:
+        return None
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -143,10 +145,13 @@ async def cmd_jobs(message: Message):
     if not jobs:
         await message.answer("Пока нет активных вакансий.")
         return
+    app_url = get_settings().app_url.rstrip("/")
+    is_local = "localhost" in app_url or "127.0.0.1" in app_url
     for job in jobs:
-        await message.answer(
-            _job_caption(job), reply_markup=_job_kb(job["id"])
-        )
+        caption = _job_caption(job)
+        if is_local:
+            caption += f"\n\n<i>Сайт: {app_url}/jobs/{quote(job['id'])}</i>"
+        await message.answer(caption, reply_markup=_job_kb(job["id"]))
 
 
 @router.message(Command("stop"))
