@@ -67,7 +67,7 @@
 3. **Vercel (сайт):** Import Project → тот же репо, **Root Directory** `frontend`, переменная **`NEXT_PUBLIC_API_URL`** = публичный URL Render (например `https://jumysaq-api.onrender.com`).
 4. В Render задайте **`PUBLIC_APP_URL`** = тот же URL фронта (ссылки в Telegram). Обновите **`CORS_ORIGINS`** на URL Vercel (через запятую, если несколько — включая preview), при необходимости перезапустите сервис.
 
-**Чеклист «до 100%»:** [docs/LAUNCH.md](docs/LAUNCH.md) · **Слайды:** [docs/SLIDES.md](docs/SLIDES.md) · **Смок API:** `.\scripts\smoke.ps1 -ApiUrl "https://ВАШ-API.onrender.com"`
+**Статус фич (сделано / нет):** [docs/PRODUCT_STATUS.md](docs/PRODUCT_STATUS.md) · **Чеклист «до 100%»:** [docs/LAUNCH.md](docs/LAUNCH.md) · **Слайды:** [docs/SLIDES.md](docs/SLIDES.md) · **Смок API:** `.\scripts\smoke.ps1 -ApiUrl "https://ВАШ-API.onrender.com"`
 
 ## Структура репозитория
 
@@ -76,7 +76,7 @@ hackaton-project/
 ├── backend/        # FastAPI + SQLAlchemy + Gemini/Groq
 ├── frontend/       # Next.js 14 (App Router)
 ├── bot/            # Telegram-бот на aiogram 3
-├── docs/           # питч-материалы
+├── docs/           # питч, LAUNCH, статус продукта (PRODUCT_STATUS)
 └── README.md
 ```
 
