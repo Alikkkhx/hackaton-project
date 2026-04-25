@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Pencil, Trash2 } from "lucide-react";
 import {
   AlertTriangle,
   BadgeCheck,
@@ -32,6 +33,21 @@ export default function JobPage() {
   const [cover, setCover] = useState("");
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const isOwner = user && job && user.role === "employer" && user.id === job.employer_id;
+
+  const handleDelete = async () => {
+    if (!confirm("Удалить вакансию?")) return;
+    setDeleting(true);
+    try {
+      await api.deleteJob(job!.id);
+      router.push("/jobs");
+    } catch (e: any) {
+      setError(e.message);
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     setUser(getStoredUser());
@@ -106,6 +122,16 @@ export default function JobPage() {
             <div className="text-xl font-semibold">
               {formatSalary(job.salary_min, job.salary_max, job.currency)}
             </div>
+            {isOwner && (
+              <div className="mt-2 flex gap-2 justify-end">
+                <Link href={`/employer/edit/${job.id}`} className="btn-primary flex items-center gap-1 text-sm px-3 py-1.5">
+                  <Pencil className="h-3.5 w-3.5" /> Изменить
+                </Link>
+                <button onClick={handleDelete} disabled={deleting} className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg border border-rose-300 text-rose-600 hover:bg-rose-50">
+                  <Trash2 className="h-3.5 w-3.5" /> Удалить
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

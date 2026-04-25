@@ -139,6 +139,11 @@ export const api = {
   myJobs: () => request<Job[]>("/api/jobs/mine/all"),
   deleteJob: (id: string) =>
     request<void>(`/api/jobs/${id}`, { method: "DELETE" }),
+  updateJob: (id: string, payload: Partial<Job>) =>
+    request<Job>(`/api/jobs/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
 
   // AI improve description
   improveDescription: (payload: { title: string; description: string; industry?: string }) =>
