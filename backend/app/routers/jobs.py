@@ -212,6 +212,36 @@ def create_job(
     return _to_job_out(job, db)
 
 
+@router.put("/{job_id}", response_model=JobOut)
+def update_job(
+    job_id: str,
+    payload: JobCreate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    job = db.get(Job, job_id)
+    if not job:
+        raise HTTPException(404, "Вакансия не найдена")
+    if job.employer_id != user.id:
+        raise HTTPException(403, "Нельзя изменить чужую вакансию")
+
+    job.title = payload.title
+    job.description = payload.description
+    job.industry = payload.industry
+    job.city = payload.city
+    job.district = payload.district
+    job.employment_type = payload.employment_type
+    job.experience = payload.experience
+    job.salary_min = payload.salary_min
+    job.salary_max = payload.salary_max
+    job.skills = payload.skills
+    job.contact = payload.contact
+
+    db.commit()
+    db.refresh(job)
+    return _to_job_out(job, db)
+
+
 @router.delete("/{job_id}", status_code=204)
 def delete_job(
     job_id: str,
