@@ -251,6 +251,9 @@ async def cb_apply(call: CallbackQuery):
 
 
 async def main():
+    import os
+    from aiohttp import web
+
     settings = get_settings()
     bot = Bot(
         token=settings.bot_token,
@@ -259,9 +262,25 @@ async def main():
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
 
+    # Tiny HTTP server for Render health checks (free web service requires a port)
+    async def health(request):
+        return web.Response(text='{"ok":true,"service":"jumysaq-bot"}', content_type="application/json")
+
+    app = web.Application()
+    app.router.add_get("/", health)
+    app.router.add_get("/health", health)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 10000))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    log.info(f"Health server on port {port}")
+
     log.info("Bot started")
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
