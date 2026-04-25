@@ -42,7 +42,7 @@ export default function Home() {
                 Я работодатель
               </Link>
               <a
-                href="https://t.me/JumysAqBot"
+                href="https://t.me/jumysaq_mangystau_bot"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn bg-[#2AABEE] text-white hover:bg-[#229ED9] px-6 py-3 text-base"
