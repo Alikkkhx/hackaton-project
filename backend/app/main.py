@@ -50,6 +50,17 @@ def health():
     return {"ok": True}
 
 
+@app.post("/api/admin/seed", tags=["meta"])
+def run_seed():
+    """Run seed script to populate demo data. Safe to call multiple times."""
+    try:
+        from app.seed import seed
+        seed()
+        return {"ok": True, "message": "Демо-данные загружены!"}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(jobs.router)
