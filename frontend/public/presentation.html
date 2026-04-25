@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JumysAQ — Презентация</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; overflow: hidden; }
+
+.slide {
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  padding: 50px 70px;
+  flex-direction: column;
+  justify-content: center;
+}
+.slide.active { display: flex; }
+
+.nav {
+  position: fixed;
+  bottom: 24px;
+  right: 40px;
+  display: flex;
+  gap: 12px;
+  z-index: 100;
+}
+.nav button {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Inter';
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+}
+.nav button:hover { background: rgba(255,255,255,0.25); }
+
+.counter {
+  position: fixed;
+  bottom: 30px;
+  left: 40px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* Speaker notes toggle */
+.notes-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.5);
+  padding: 6px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Inter';
+  z-index: 100;
+}
+.speaker-notes {
+  display: none;
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  background: rgba(0,0,0,0.9);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.8);
+  z-index: 99;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.speaker-notes.visible { display: block; }
+
+/* Slide 1: Title */
+.slide-1 {
+  background: linear-gradient(135deg, #0066ff 0%, #0033aa 50%, #001155 100%);
+  text-align: center;
+  align-items: center;
+}
+.slide-1 .logo {
+  width: 90px; height: 90px;
+  background: #fff;
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; font-weight: 900;
+  color: #0066ff;
+  margin-bottom: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.slide-1 h1 { font-size: 80px; font-weight: 900; letter-spacing: -2px; }
+.slide-1 .subtitle { font-size: 26px; opacity: 0.85; margin-top: 16px; max-width: 700px; line-height: 1.4; }
+.slide-1 .team { font-size: 16px; opacity: 0.5; margin-top: 40px; }
+
+/* Slide 2: Problem - stats */
+.slide-2 { background: linear-gradient(135deg, #1a0a00 0%, #0a0a0a 100%); }
+.slide-2 h2 { font-size: 44px; font-weight: 900; color: #ff6b35; margin-bottom: 10px; }
+.slide-2 .subtitle { font-size: 18px; opacity: 0.6; margin-bottom: 30px; }
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.problem-card {
+  background: rgba(255, 107, 53, 0.08);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  border-radius: 16px;
+  padding: 28px;
+}
+.problem-card .stat { font-size: 42px; font-weight: 900; color: #ff6b35; }
+.problem-card h3 { font-size: 17px; font-weight: 700; margin: 8px 0; color: #ff9b73; }
+.problem-card p { font-size: 14px; line-height: 1.6; opacity: 0.7; }
+
+/* Slide 3: Solution */
+.slide-3 { background: linear-gradient(135deg, #001a00 0%, #0a0a0a 100%); }
+.slide-3 h2 { font-size: 44px; font-weight: 900; color: #00cc66; margin-bottom: 10px; }
+.slide-3 .subtitle { font-size: 18px; opacity: 0.6; margin-bottom: 30px; }
+.solution-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.solution-card {
+  background: rgba(0, 204, 102, 0.06);
+  border: 1px solid rgba(0, 204, 102, 0.15);
+  border-radius: 16px;
+  padding: 22px;
+}
+.solution-card .icon { font-size: 28px; margin-bottom: 10px; }
+.solution-card h3 { font-size: 16px; font-weight: 700; color: #00cc66; }
+.solution-card p { font-size: 13px; line-height: 1.5; opacity: 0.7; margin-top: 6px; }
+
+/* Slide 4: How it works */
+.slide-4 { background: linear-gradient(135deg, #0a001a 0%, #0a0a0a 100%); }
+.slide-4 h2 { font-size: 44px; font-weight: 900; color: #a855f7; margin-bottom: 10px; }
+.slide-4 .subtitle { font-size: 18px; opacity: 0.6; margin-bottom: 30px; }
+.flow-container { display: flex; gap: 16px; align-items: stretch; }
+.flow-card {
+  flex: 1;
+  background: rgba(168, 85, 247, 0.06);
+  border: 1px solid rgba(168, 85, 247, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  position: relative;
+}
+.flow-card .step {
+  width: 36px; height: 36px;
+  background: rgba(168, 85, 247, 0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 16px; color: #a855f7;
+  margin: 0 auto 12px;
+}
+.flow-card .icon { font-size: 32px; margin-bottom: 10px; }
+.flow-card h3 { font-size: 15px; font-weight: 700; color: #c084fc; }
+.flow-card p { font-size: 12px; opacity: 0.6; margin-top: 6px; line-height: 1.4; }
+.flow-arrow { display: flex; align-items: center; font-size: 24px; color: rgba(168,85,247,0.4); }
+
+/* Slide 5: AI Deep */
+.slide-5 { background: linear-gradient(135deg, #0a0a1a 0%, #0a0a0a 100%); }
+.slide-5 h2 { font-size: 44px; font-weight: 900; color: #38bdf8; margin-bottom: 10px; }
+.slide-5 .subtitle { font-size: 18px; opacity: 0.6; margin-bottom: 30px; }
+.ai-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.ai-detail-card {
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+}
+.ai-detail-card .icon { font-size: 36px; margin-bottom: 12px; }
+.ai-detail-card h3 { font-size: 17px; font-weight: 700; color: #38bdf8; margin-bottom: 6px; }
+.ai-detail-card p { font-size: 13px; line-height: 1.5; opacity: 0.7; }
+.ai-detail-card .example {
+  margin-top: 12px;
+  background: rgba(56, 189, 248, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.8;
+  border-left: 3px solid #38bdf8;
+}
+
+/* Slide 6: Demo */
+.slide-6 {
+  background: linear-gradient(135deg, #0066ff 0%, #0033aa 100%);
+  text-align: center;
+  align-items: center;
+}
+.slide-6 h2 { font-size: 56px; font-weight: 900; margin-bottom: 10px; }
+.slide-6 .subtitle { font-size: 20px; opacity: 0.7; margin-bottom: 30px; }
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.demo-card {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.demo-card .icon { font-size: 36px; margin-bottom: 8px; }
+.demo-card h3 { font-size: 16px; font-weight: 700; }
+.demo-card p { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+
+/* Slide 7: Tech */
+.slide-7 { background: linear-gradient(135deg, #0a0a1a 0%, #0a0a0a 100%); }
+.slide-7 h2 { font-size: 44px; font-weight: 900; color: #f472b6; margin-bottom: 10px; }
+.slide-7 .subtitle { font-size: 18px; opacity: 0.6; margin-bottom: 30px; }
+.arch-container { display: flex; gap: 20px; }
+.arch-col {
+  flex: 1;
+  border-radius: 16px;
+  padding: 24px;
+}
+.arch-col h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.arch-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; }
+.arch-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.col-front { background: rgba(59, 130, 246, 0.06); border: 1px solid rgba(59, 130, 246, 0.15); }
+.col-front h3 { color: #3b82f6; }
+.col-front .dot { background: #3b82f6; }
+.col-back { background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.15); }
+.col-back h3 { color: #10b981; }
+.col-back .dot { background: #10b981; }
+.col-ai { background: rgba(168, 85, 247, 0.06); border: 1px solid rgba(168, 85, 247, 0.15); }
+.col-ai h3 { color: #a855f7; }
+.col-ai .dot { background: #a855f7; }
+.col-infra { background: rgba(234, 179, 8, 0.06); border: 1px solid rgba(234, 179, 8, 0.15); }
+.col-infra h3 { color: #eab308; }
+.col-infra .dot { background: #eab308; }
+
+/* Slide 8: Impact */
+.slide-8 { background: linear-gradient(135deg, #1a1a00 0%, #0a0a0a 100%); }
+.slide-8 h2 { font-size: 44px; font-weight: 900; color: #eab308; margin-bottom: 10px; }
+.slide-8 .subtitle { font-size: 18px; opacity: 0.6; margin-bottom: 30px; }
+.impact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.impact-left {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.stat-card {
+  background: rgba(234, 179, 8, 0.06);
+  border: 1px solid rgba(234, 179, 8, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+.stat-card .number { font-size: 40px; font-weight: 900; color: #eab308; }
+.stat-card p { font-size: 13px; opacity: 0.7; margin-top: 6px; }
+.impact-right {
+  background: rgba(234, 179, 8, 0.04);
+  border: 1px solid rgba(234, 179, 8, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+}
+.impact-right h3 { font-size: 18px; font-weight: 700; color: #eab308; margin-bottom: 16px; }
+.benefit-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+.benefit-item .check { color: #eab308; font-size: 18px; flex-shrink: 0; }
+.benefit-item div h4 { font-size: 14px; font-weight: 600; }
+.benefit-item div p { font-size: 12px; opacity: 0.6; }
+
+/* Slide 9: Roadmap */
+.slide-9 { background: linear-gradient(135deg, #001a1a 0%, #0a0a0a 100%); }
+.slide-9 h2 { font-size: 44px; font-weight: 900; color: #14b8a6; margin-bottom: 10px; }
+.slide-9 .subtitle { font-size: 18px; opacity: 0.6; margin-bottom: 30px; }
+.roadmap { display: flex; gap: 20px; }
+.roadmap-card {
+  flex: 1;
+  background: rgba(20, 184, 166, 0.06);
+  border: 1px solid rgba(20, 184, 166, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+}
+.roadmap-card.current { border-color: rgba(20, 184, 166, 0.5); box-shadow: 0 0 30px rgba(20, 184, 166, 0.1); }
+.roadmap-card .phase {
+  display: inline-block;
+  background: rgba(20, 184, 166, 0.2);
+  color: #14b8a6;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.roadmap-card.current .phase { background: #14b8a6; color: #000; }
+.roadmap-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.roadmap-card ul { list-style: none; }
+.roadmap-card ul li { font-size: 13px; opacity: 0.7; padding: 3px 0; }
+.roadmap-card ul li::before { content: "→ "; color: #14b8a6; }
+
+/* Slide 10: Final */
+.slide-10 {
+  background: linear-gradient(135deg, #0066ff 0%, #0033aa 50%, #001155 100%);
+  text-align: center;
+  align-items: center;
+}
+.slide-10 h2 { font-size: 72px; font-weight: 900; }
+.slide-10 .tagline { font-size: 28px; opacity: 0.85; margin-top: 16px; }
+.slide-10 .mission { font-size: 18px; opacity: 0.6; margin-top: 12px; max-width: 600px; line-height: 1.5; }
+.slide-10 .links { margin-top: 40px; font-size: 17px; opacity: 0.6; line-height: 2; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide.active > * {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+.slide.active > *:nth-child(2) { animation-delay: 0.1s; }
+.slide.active > *:nth-child(3) { animation-delay: 0.2s; }
+.slide.active > *:nth-child(4) { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- 1: Титул -->
+<div class="slide slide-1 active" data-n="1">
+  <div class="logo">JQ</div>
+  <h1>JumysAQ</h1>
+  <div class="subtitle">Маңғыстау өңірінің жұмыспен қамтуды цифрландыру платформасы</div>
+  <div class="team">Mangystau Hackathon 2026</div>
+  <div class="notes" hidden>Сәлеметсіздер ме! Біз — JumysAQ командасы. Біздің платформа Маңғыстау өңірінің жұмыс нарығын цифрландыруға арналған.</div>
+</div>
+
+<!-- 2: Мәселе + статистика -->
+<div class="slide slide-2" data-n="2">
+  <h2>Мәселе</h2>
+  <div class="subtitle">Маңғыстаудағы жұмыс нарығының негізгі проблемалары</div>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="stat">85%</div>
+      <h3>WhatsApp арқылы іздейді</h3>
+      <p>Маңғыстаудағы шағын бизнестің 85%-ы вакансияларды тек WhatsApp чаттарына жібереді. Іздеу, тарих, жүйелеу жоқ.</p>
+    </div>
+    <div class="problem-card">
+      <div class="stat">12%</div>
+      <h3>hh.ru қамтуы</h3>
+      <p>hh.ru мен enbek.kz Маңғыстау шағын бизнесінің тек 12%-ын қамтиды. Ауылдар мен қалашықтар мүлдем жоқ.</p>
+    </div>
+    <div class="problem-card">
+      <div class="stat">30%+</div>
+      <h3>Жастар жұмыссыздығы</h3>
+      <p>Маңғыстаудағы 18-25 жас арасындағы жастардың жұмыссыздық деңгейі 30%-дан асады. Мүмкіндіктерді көрмейді.</p>
+    </div>
+  </div>
+  <div class="notes" hidden>Маңғыстауда жұмыс іздеудің 85%-ы WhatsApp-та болады. hh.ru тек 12% шағын бизнесті қамтиды. Жастар арасында жұмыссыздық 30%-дан асады.</div>
+</div>
+
+<!-- 3: Шешім -->
+<div class="slide slide-3" data-n="3">
+  <h2> Шешім — JumysAQ</h2>
+  <div class="subtitle">AI негізіндегі бірыңғай жұмыспен қамту платформасы</div>
+  <div class="solution-grid">
+    <div class="solution-card">
+      <div class="icon">🔍</div>
+      <h3>Ақылды іздеу</h3>
+      <p>8 қала, 29 Ақтау ауданы, 10+ сала бойынша сүзгілер. Бір жерде бәрі бар.</p>
+    </div>
+    <div class="solution-card">
+      <div class="icon">🤖</div>
+      <h3>AI-матчинг</h3>
+      <p>Жасанды интеллект профильді талдап, ең сәйкес вакансияларды таңдайды.</p>
+    </div>
+    <div class="solution-card">
+      <div class="icon">✨</div>
+      <h3>AI-редактор</h3>
+      <p>Жұмыс беруші қарапайым мәтін жазады → AI кәсіби сипаттамаға айналдырады.</p>
+    </div>
+    <div class="solution-card">
+      <div class="icon">🛡️</div>
+      <h3>Anti-scam AI</h3>
+      <p>Әр вакансия автоматты түрде алаяқтық белгілеріне тексеріледі.</p>
+    </div>
+    <div class="solution-card">
+      <div class="icon">📲</div>
+      <h3>Telegram-бот</h3>
+      <p>@jumysaq_mangystau_bot — вакансия іздеу және жеке хабарландыру алу.</p>
+    </div>
+    <div class="solution-card">
+      <div class="icon">📱</div>
+      <h3>Мобильді дизайн</h3>
+      <p>Телефоннан толық қолдануға оңтайландырылған. Touch-friendly интерфейс.</p>
+    </div>
+  </div>
+  <div class="notes" hidden>JumysAQ — меселенің шешімі. 6 негізгі мүмкіндік: ақылды іздеу, AI-матчинг, AI-редактор, Anti-scam, Telegram-бот, мобильді дизайн.</div>
+</div>
+
+<!-- 4: Қалай жұмыс істейді -->
+<div class="slide slide-4" data-n="4">
+  <h2>🔄 Қалай жұмыс істейді?</h2>
+  <div class="subtitle">Жұмыс іздеуші мен жұмыс берушінің жолы</div>
+  <div class="flow-container">
+    <div class="flow-card">
+      <div class="step">1</div>
+      <div class="icon">📝</div>
+      <h3>Тіркелу</h3>
+      <p>Жұмыс іздеуші немесе жұмыс беруші ретінде тіркелу. Телефон верификациясы.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-card">
+      <div class="step">2</div>
+      <div class="icon">✍️</div>
+      <h3>Профиль / Вакансия</h3>
+      <p>Іздеуші дағдыларын толтырады. Беруші вакансия жариялайды + AI мәтін жазады.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-card">
+      <div class="step">3</div>
+      <div class="icon">🤖</div>
+      <h3>AI талдау</h3>
+      <p>AI скам тексереді, embedding жасайды, матчинг дайындайды.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-card">
+      <div class="step">4</div>
+      <div class="icon">🎯</div>
+      <h3>Нәтиже</h3>
+      <p>Іздеуші сәйкес вакансиялар алады. Беруші өтініштер қабылдайды. Telegram хабарландыру.</p>
+    </div>
+  </div>
+  <div class="notes" hidden>Платформа 4 қадамнан тұрады: тіркелу, профиль толтыру, AI талдау, нәтиже алу. Барлығы автоматты.</div>
+</div>
+
+<!-- 5: AI тереңірек -->
+<div class="slide slide-5" data-n="5">
+  <h2>🧠 AI-технологиялар</h2>
+  <div class="subtitle">Google Gemini негізіндегі 3 интеллектуалды жүйе</div>
+  <div class="ai-detail-grid">
+    <div class="ai-detail-card">
+      <div class="icon">🎯</div>
+      <h3>AI-матчинг</h3>
+      <p>Embedding-based векторлық іздеу. Соискатель дағдылары мен вакансия талаптарын семантикалық деңгейде салыстырады.</p>
+      <div class="example">
+        <strong>Мысал:</strong> «кофе жасай аламын, клиенттермен жақсы сөйлесемін» → Бариста вакансиясы 92% сәйкес
+      </div>
+    </div>
+    <div class="ai-detail-card">
+      <div class="icon">✍️</div>
+      <h3>AI-редактор</h3>
+      <p>Жұмыс берушінің қарапайым мәтінін толық, құрылымды сипаттамаға айналдырады.</p>
+      <div class="example">
+        <strong>Кірісі:</strong> «бариста керек, 2/2 график»<br>
+        <strong>Шығысы:</strong> Міндеттемелер, талаптар, жеңілдіктер бар толық сипаттама
+      </div>
+    </div>
+    <div class="ai-detail-card">
+      <div class="icon">🛡️</div>
+      <h3>Anti-scam AI</h3>
+      <p>5 критерийді тексереді: алдын ала төлем, шынайы емес жалақы, жеке деректер сұрау, анонимді контакт, түсініксіз міндеттер.</p>
+      <div class="example">
+        <strong>Мысал:</strong> «Алдын ала 5000₸ төлеңіз» → ⚠️ Risk: 0.85 — «Алаяқтық белгілері анықталды»
+      </div>
+    </div>
+  </div>
+  <div class="notes" hidden>3 AI жүйе: матчинг — embedding салыстыру, редактор — мәтін жақсарту, anti-scam — алаяқтық анықтау. Барлығы Gemini API арқылы.</div>
+</div>
+
+<!-- 6: Демо -->
+<div class="slide slide-6" data-n="6">
+  <h2>🖥️ Тікелей демо</h2>
+  <div class="subtitle">Платформаны көрсетейік</div>
+  <div class="demo-grid">
+    <div class="demo-card">
+      <div class="icon">🌐</div>
+      <h3>Веб-сайт</h3>
+      <p>jumysaq-web.onrender.com</p>
+    </div>
+    <div class="demo-card">
+      <div class="icon">📡</div>
+      <h3>API құжаттамасы</h3>
+      <p>jumysaq-api.onrender.com/docs</p>
+    </div>
+    <div class="demo-card">
+      <div class="icon">🤖</div>
+      <h3>Telegram-бот</h3>
+      <p>@jumysaq_mangystau_bot</p>
+    </div>
+    <div class="demo-card">
+      <div class="icon">💻</div>
+      <h3>Бастапқы код</h3>
+      <p>GitHub: Alikkkhx/hackaton-project</p>
+    </div>
+  </div>
+  <div class="notes" hidden>Демо сценарий: 1) Вакансиялар тізімі + сүзгілер, 2) Работодатель ретінде вакансия жасау + AI текст, 3) Соискатель ретінде AI-матчинг, 4) Telegram бот.</div>
+</div>
+
+<!-- 7: Архитектура -->
+<div class="slide slide-7" data-n="7">
+  <h2>⚙️ Техникалық архитектура</h2>
+  <div class="subtitle">Қазіргі заманғы технологиялар стегі</div>
+  <div class="arch-container">
+    <div class="arch-col col-front">
+      <h3>🎨 Frontend</h3>
+      <div class="arch-item"><span class="dot"></span> Next.js 14 (App Router)</div>
+      <div class="arch-item"><span class="dot"></span> TypeScript</div>
+      <div class="arch-item"><span class="dot"></span> Responsive UI</div>
+      <div class="arch-item"><span class="dot"></span> Lucide Icons</div>
+    </div>
+    <div class="arch-col col-back">
+      <h3>⚡ Backend</h3>
+      <div class="arch-item"><span class="dot"></span> FastAPI (Python)</div>
+      <div class="arch-item"><span class="dot"></span> SQLAlchemy ORM</div>
+      <div class="arch-item"><span class="dot"></span> JWT аутентификация</div>
+      <div class="arch-item"><span class="dot"></span> bcrypt хеширлеу</div>
+    </div>
+    <div class="arch-col col-ai">
+      <h3>🤖 AI</h3>
+      <div class="arch-item"><span class="dot"></span> Google Gemini API</div>
+      <div class="arch-item"><span class="dot"></span> Embedding матчинг</div>
+      <div class="arch-item"><span class="dot"></span> NLP талдау</div>
+      <div class="arch-item"><span class="dot"></span> Risk scoring</div>
+    </div>
+    <div class="arch-col col-infra">
+      <h3>☁️ Инфрақұрылым</h3>
+      <div class="arch-item"><span class="dot"></span> PostgreSQL</div>
+      <div class="arch-item"><span class="dot"></span> Render (хостинг)</div>
+      <div class="arch-item"><span class="dot"></span> aiogram 3 (бот)</div>
+      <div class="arch-item"><span class="dot"></span> REST API</div>
+    </div>
+  </div>
+  <div class="notes" hidden>4 қабатты архитектура: Frontend — Next.js, Backend — FastAPI, AI — Gemini, Инфрақұрылым — Render + PostgreSQL. Толық REST API /docs-та.</div>
+</div>
+
+<!-- 8: Әсер мен артықшылықтар -->
+<div class="slide slide-8" data-n="8">
+  <h2>📊 Әлеует пен артықшылықтар</h2>
+  <div class="subtitle">Маңғыстау нарығына тигізетін ықпал</div>
+  <div class="impact-grid">
+    <div class="impact-left">
+      <div class="stat-card">
+        <div class="number">700K+</div>
+        <p>Маңғыстау халқы</p>
+      </div>
+      <div class="stat-card">
+        <div class="number">8</div>
+        <p>Қала мен елді мекен</p>
+      </div>
+      <div class="stat-card">
+        <div class="number">15+</div>
+        <p>API эндпоинттер</p>
+      </div>
+      <div class="stat-card">
+        <div class="number">0₸</div>
+        <p>Іздеушілерге тегін</p>
+      </div>
+    </div>
+    <div class="impact-right">
+      <h3>Кімге пайдасы бар?</h3>
+      <div class="benefit-item">
+        <span class="check">✓</span>
+        <div>
+          <h4>Жұмыс іздеушілер</h4>
+          <p>AI көмегімен дәл сәйкес вакансияларды табады</p>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="check">✓</span>
+        <div>
+          <h4>Шағын бизнес</h4>
+          <p>Ақысыз вакансия жариялау + AI кәсіби мәтін жазады</p>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="check">✓</span>
+        <div>
+          <h4>Мемлекет (ХҚО)</h4>
+          <p>Аймақ деңгейінде жұмыс нарығын цифрландыру</p>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="check">✓</span>
+        <div>
+          <h4>Қоғам</h4>
+          <p>Алаяқтық вакансиялардан қорғау, мөлдірлік</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="notes" hidden>700 мың халық, 8 қала. Пайда: іздеушілер AI-матчинг, бизнес тегін вакансия + AI мәтін, мемлекет цифрландыру, қоғам алаяқтықтан қорғалу.</div>
+</div>
+
+<!-- 9: Даму жоспары -->
+<div class="slide slide-9" data-n="9">
+  <h2>🚀 Даму жоспары</h2>
+  <div class="subtitle">Хакатоннан — нақты өнімге</div>
+  <div class="roadmap">
+    <div class="roadmap-card current">
+      <div class="phase">ҚАЗІР — MVP</div>
+      <h3>Хакатон нұсқасы</h3>
+      <ul>
+        <li>Веб-платформа + API</li>
+        <li>AI матчинг, редактор, anti-scam</li>
+        <li>Telegram-бот</li>
+        <li>8 қала қамтылған</li>
+      </ul>
+    </div>
+    <div class="roadmap-card">
+      <div class="phase">Q3 2026</div>
+      <h3>Бета-нұсқа</h3>
+      <ul>
+        <li>SMS верификация (нақты)</li>
+        <li>Android / iOS қосымша</li>
+        <li>Резюме конструктор</li>
+        <li>Аналитика dashboard</li>
+      </ul>
+    </div>
+    <div class="roadmap-card">
+      <div class="phase">Q4 2026</div>
+      <h3>Іске қосу</h3>
+      <ul>
+        <li>ХҚО интеграциясы</li>
+        <li>Premium-вакансиялар (монетизация)</li>
+        <li>Компанияларға верификация</li>
+        <li>Маңғыстау пилот</li>
+      </ul>
+    </div>
+    <div class="roadmap-card">
+      <div class="phase">2027</div>
+      <h3>Масштабтау</h3>
+      <ul>
+        <li>Бүкіл Қазақстанға кеңейту</li>
+        <li>B2B тарифтер</li>
+        <li>HR-автоматтау</li>
+        <li>AI-сұхбат дайындық</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes" hidden>Қазір MVP дайын. Келесі қадамдар: SMS, мобильді қосымша, ХҚО интеграция, монетизация, бүкіл ҚР-ға кеңейту.</div>
+</div>
+
+<!-- 10: Қорытынды -->
+<div class="slide slide-10" data-n="10">
+  <h2>JumysAQ</h2>
+  <div class="tagline">Жұмыс іздеуді оңай етеміз 🇰🇿</div>
+  <div class="mission">Маңғыстаудың әр тұрғынына сапалы жұмыс мүмкіндіктерін AI көмегімен ашу — біздің миссиямыз.</div>
+  <div class="links">
+    <p>🌐 jumysaq-web.onrender.com</p>
+    <p>🤖 @jumysaq_mangystau_bot</p>
+    <p>💻 github.com/Alikkkhx/hackaton-project</p>
+  </div>
+  <div class="notes" hidden>Рахмет! Сұрақтарыңыз бар ма?</div>
+</div>
+
+<div class="nav">
+  <button onclick="go(-1)">← Артқа</button>
+  <button onclick="go(1)">Алға →</button>
+</div>
+<button class="notes-btn" onclick="toggleNotes()">📝 Жазбалар</button>
+<div class="speaker-notes" id="speakerNotes"></div>
+<div class="counter" id="counter">1 / 10</div>
+
+<script>
+let current = 1;
+const total = 10;
+let notesVisible = false;
+
+function go(dir) {
+  const next = current + dir;
+  if (next < 1 || next > total) return;
+  document.querySelector(`.slide[data-n="${current}"]`).classList.remove('active');
+  current = next;
+  document.querySelector(`.slide[data-n="${current}"]`).classList.add('active');
+  document.getElementById('counter').textContent = `${current} / ${total}`;
+  updateNotes();
+}
+
+function toggleNotes() {
+  notesVisible = !notesVisible;
+  document.getElementById('speakerNotes').classList.toggle('visible', notesVisible);
+  updateNotes();
+}
+
+function updateNotes() {
+  const slide = document.querySelector(`.slide[data-n="${current}"]`);
+  const notes = slide.querySelector('.notes');
+  document.getElementById('speakerNotes').textContent = notes ? notes.textContent : '';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'n') toggleNotes();
+});
+</script>
+</body>
+</html>
