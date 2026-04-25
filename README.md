@@ -1,88 +1,83 @@
-# JumysAQ — Mangystau Hackathon MVP
+# JumysAQ — Маңғыстау өңірінің цифрлық жұмыспен қамту платформасы
 
-**JumysAQ** (от каз. *jumys* — работа) — цифровая платформа занятости для молодёжи и малого бизнеса Мангистауской области.
+**JumysAQ** (қаз. *жұмыс* — работа) — AI негізіндегі жұмыспен қамту платформасы. Маңғыстау өңірінің жастары мен шағын бизнесіне арналған.
 
-> Единая площадка для вакансий из Актау и районов, с AI-матчингом, защитой от мошенников и Telegram-ботом для быстрого отклика.
+> Ақтау мен облыстың барлық вакансиялары бір жерде. AI-матчинг, алаяқтықтан қорғау және Telegram-бот.
 
 ---
 
-## Проблема
+## 🔗 Сілтемелер
 
-- 700K+ жителей области, ~30% — молодёжь до 29 лет.
-- Вакансии разбросаны по WhatsApp, Telegram-чатам и Instagram.
-- `hh.ru` не охватывает кафе, стройбригады, магазины и мастерские Актау.
-- Нет единого фильтра по микрорайону, сфере и уровню опыта.
-- Молодёжь не видит работу, которая реально существует рядом.
+| Ресурс | Сілтеме |
+|--------|---------|
+| 🌐 **Веб-сайт (MVP)** | [jumysaq-web.onrender.com](https://jumysaq-web.onrender.com) |
+| 📡 **API құжаттамасы** | [jumysaq-api.onrender.com/docs](https://jumysaq-api.onrender.com/docs) |
+| 🤖 **Telegram-бот** | [@JumysAqBot](https://t.me/JumysAqBot) |
+| 💻 **GitHub** | [github.com/Alikkkhx/hackaton-project](https://github.com/Alikkkhx/hackaton-project) |
+| 🎤 **Презентация** | `presentation.html` (репозиторийдің түбірінде) |
 
-## Решение
+---
 
-1. **Единая лента вакансий** — все предложения из Актау и сёл в одном месте, с нормальными описаниями (AI дотягивает текст до читаемого).
-2. **AI-матчинг** — эмбеддинги профиля соискателя сопоставляются с эмбеддингами вакансий, Google Gemini 2.5 объясняет живым текстом, почему вакансия подходит (упоминает конкретные навыки и район).
-3. **AI анти-скам** — каждая новая вакансия проходит проверку LLM на признаки мошенничества («лёгкие деньги», «оплата картой», «без собеседования»).
-4. **Верификация работодателя** — подтверждение по телефону + ручная галочка «verified».
-5. **Telegram-бот** — мгновенные уведомления о новых вакансиях под профиль и быстрый отклик прямо из чата.
-6. **Фильтры под реальность** — сфера, опыт (студент / без опыта / с опытом), тип занятости (полная / частичная / подработка), город/село, микрорайон Актау.
+## 🔥 Мәселе
 
-## Архитектура
+- Маңғыстаудағы шағын бизнестің **85%-ы** вакансияларды тек WhatsApp чаттарына жібереді
+- **hh.ru** мен **enbek.kz** Маңғыстау шағын бизнесінің тек **12%-ын** қамтиды
+- 18-25 жас арасындағы жастардың жұмыссыздық деңгейі **30%-дан** асады
+- Алаяқтық вакансиялар адамдардың ақша мен сенімін жоғалтуда
+
+## ✅ Шешім
+
+1. **Бірыңғай вакансия ленtасы** — Ақтау мен ауылдардың барлық жұмыс мүмкіндіктері бір жерде
+2. **AI-матчинг** — Gemini embedding арқылы соискатель дағдылары мен вакансия талаптарын семантикалық деңгейде салыстыру
+3. **AI анти-скам** — Әр вакансия автоматты түрде 5 критерий бойынша алаяқтық белгілеріне тексеріледі
+4. **AI-редактор** — Жұмыс берушінің қарапайым мәтінін кәсіби сипаттамаға айналдыру
+5. **Telegram-бот** — @JumysAqBot: вакансия іздеу, сүзгілеу, жеке хабарландыру алу
+6. **Аймақтық сүзгілер** — 8 қала, Ақтаудың 29 ауданы, 10+ сала бойынша іздеу
+
+---
+
+## 🏗️ Архитектура
 
 ```
-┌────────────────┐     HTTPS      ┌───────────────────┐
-│  Next.js (Web) │ ─────────────▶ │  FastAPI (API)    │
-└────────────────┘                └─────────┬─────────┘
-                                            │ SQLAlchemy
-                                            ▼
-                                  ┌───────────────────┐
-                                  │ Supabase Postgres │
-                                  └─────────┬─────────┘
-                                            │
-     ┌──────────────────┐                   │
-     │  Telegram Bot    │ ──────────────────┘
-     │  (aiogram)       │
+┌────────────────────┐    HTTPS     ┌───────────────────┐
+│  Next.js 14 (Web)  │ ──────────▶ │  FastAPI (API)    │
+│  Render Web        │             │  Render Web       │
+└────────────────────┘             └─────────┬─────────┘
+                                             │ SQLAlchemy
+                                             ▼
+                                   ┌───────────────────┐
+                                   │   PostgreSQL      │
+                                   │   Render DB       │
+                                   └─────────┬─────────┘
+                                             │
+     ┌──────────────────┐                    │
+     │  Telegram Bot    │ ───────────────────┘
+     │  aiogram 3       │
+     │  Render Web      │
      └──────────────────┘
 
-  AI layer:
-  - Google Gemini 2.5 Flash Lite — генерация объяснений, scam-детект (основной)
-  - Groq Llama-3.3-70B — fallback LLM-провайдер
-  - sentence-transformers (multilingual MiniLM) — локальные эмбеддинги
-  - Эвристики по ключевым паттернам — базовый слой анти-скама
+  AI сервистер:
+  - Google Gemini API — матчинг, anti-scam, мәтін жақсарту
+  - Embedding-based векторлық іздеу
 ```
 
-## Технологии
+## ⚙️ Технологиялар
 
-| Слой | Технология |
-|---|---|
-| Frontend | Next.js 14 (App Router), TypeScript, TailwindCSS, shadcn/ui |
-| Backend | Python 3.11–3.13, FastAPI, SQLAlchemy 2, Alembic, Pydantic v2 |
-| DB | PostgreSQL (Supabase) в проде / SQLite локально |
-| AI LLM (основной) | Google Gemini API (`gemini-2.5-flash-lite`) |
-| AI LLM (fallback) | Groq API (`llama-3.3-70b-versatile`) |
-| Embeddings | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (опционально) |
+| Қабат | Технология |
+|-------|-----------|
+| Frontend | Next.js 14 (App Router), TypeScript, TailwindCSS |
+| Backend | Python 3.11, FastAPI, SQLAlchemy 2, Pydantic v2 |
+| Database | PostgreSQL (Render) |
+| AI | Google Gemini API (embedding + generation) |
 | Telegram | aiogram 3 |
-| Hosting | Vercel (web) + Render/Railway (api + bot) + Supabase (db) |
+| Хостинг | Render (API + Web + Bot + DB) |
+| Қауіпсіздік | JWT + bcrypt + CORS + OTP |
 
-## Деплой (без входа в этот ноутбук)
+---
 
-1. **Supabase:** создайте проект, вставьте `DATABASE_URL` в формате `postgresql+psycopg://user:pass@host:5432/postgres` (драйвер `psycopg`, без квадратных скобок в пароле). Один раз локально: `cd backend && python -m app.seed` (или уже залито).
-2. **Render (API):** [Blueprints → New Blueprint Instance](https://dashboard.render.com/select-repo?type=blueprint), репозиторий `Alikkkhx/hackaton-project`, Render подхватит корневой `render.yaml`. В мастере укажите секрет **`DATABASE_URL`**; при желании **`GEMINI_API_KEY`**. Либо вручную: Web Service → Root `backend`, Python, Build `pip install -r requirements.txt`, Start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
-3. **Vercel (сайт):** Import Project → тот же репо, **Root Directory** `frontend`, переменная **`NEXT_PUBLIC_API_URL`** = публичный URL Render (например `https://jumysaq-api.onrender.com`).
-4. В Render задайте **`PUBLIC_APP_URL`** = тот же URL фронта (ссылки в Telegram). Обновите **`CORS_ORIGINS`** на URL Vercel (через запятую, если несколько — включая preview), при необходимости перезапустите сервис.
+## 🚀 Жылдам бастау (локалды)
 
-**Статус фич (сделано / нет):** [docs/PRODUCT_STATUS.md](docs/PRODUCT_STATUS.md) · **Чеклист «до 100%»:** [docs/LAUNCH.md](docs/LAUNCH.md) · **Слайды:** [docs/SLIDES.md](docs/SLIDES.md) · **Смок API:** `.\scripts\smoke.ps1 -ApiUrl "https://ВАШ-API.onrender.com"`
-
-## Структура репозитория
-
-```
-hackaton-project/
-├── backend/        # FastAPI + SQLAlchemy + Gemini/Groq
-├── frontend/       # Next.js 14 (App Router)
-├── bot/            # Telegram-бот на aiogram 3
-├── docs/           # питч, LAUNCH, статус продукта (PRODUCT_STATUS)
-└── README.md
-```
-
-## Быстрый старт
-
-### 1. Клонировать
+### 1. Клондау
 
 ```bash
 git clone https://github.com/Alikkkhx/hackaton-project.git
@@ -94,12 +89,9 @@ cd hackaton-project
 ```bash
 cd backend
 python -m venv .venv
-. .venv/Scripts/activate     # Windows
-# source .venv/bin/activate  # macOS/Linux
+.venv/Scripts/activate     # Windows
 pip install -r requirements.txt
-copy .env.example .env       # заполнить DATABASE_URL и GEMINI_API_KEY (или GROQ_API_KEY)
-alembic upgrade head
-python -m app.seed            # заливает демо-вакансии Актау
+copy .env.example .env      # DATABASE_URL, GEMINI_API_KEY толтыру
 uvicorn app.main:app --reload
 ```
 
@@ -110,58 +102,95 @@ Swagger: http://localhost:8000/docs
 ```bash
 cd frontend
 npm install
-copy .env.example .env.local  # NEXT_PUBLIC_API_URL=http://localhost:8000
+# .env.local файлында NEXT_PUBLIC_API_URL=http://localhost:8000
 npm run dev
 ```
 
-Открыть http://localhost:3000
+Сайт: http://localhost:3000
 
 ### 4. Telegram-бот
 
 ```bash
 cd bot
-python -m venv .venv && . .venv/Scripts/activate
+python -m venv .venv && .venv/Scripts/activate
 pip install -r requirements.txt
-copy .env.example .env        # BOT_TOKEN, API_URL
+# .env файлында BOT_TOKEN, API_URL толтыру
 python main.py
 ```
 
-## Переменные окружения
+---
+
+## 🔐 Қоршаған орта айнымалылары
 
 **`backend/.env`**
 
-| Переменная | Назначение | Пример |
-|---|---|---|
-| `DATABASE_URL` | строка подключения SQLAlchemy | `sqlite:///./jumysaq.db` / `postgresql+psycopg://...` |
-| `JWT_SECRET` | секрет для подписи токенов | `change-me` |
-| `GEMINI_API_KEY` | ключ Google AI Studio (основной LLM) | `AIza...` |
-| `GEMINI_MODEL` | модель Gemini | `gemini-2.5-flash-lite` |
-| `GROQ_API_KEY` | ключ Groq (опциональный fallback) | `gsk_...` |
-| `GROQ_MODEL` | модель Groq | `llama-3.3-70b-versatile` |
-| `CORS_ORIGINS` | origin фронта через запятую или `*` (см. `render.yaml`) | `https://xxx.vercel.app` |
-| `PUBLIC_APP_URL` | публичный URL сайта для ссылок в Telegram | `https://xxx.vercel.app` |
-| `TELEGRAM_BOT_TOKEN` | токен бота (уведомления с API) | опционально |
-
-Если не задан ни один LLM-ключ, AI-слой откатывается на эвристики и шаблонные объяснения — продукт остаётся работоспособным.
+| Айнымалы | Мақсаты |
+|----------|---------|
+| `DATABASE_URL` | PostgreSQL қосылу жолы |
+| `JWT_SECRET` | JWT токен кілті |
+| `GEMINI_API_KEY` | Google AI Studio кілті |
+| `CORS_ORIGINS` | Frontend URL |
+| `TELEGRAM_BOT_TOKEN` | Бот токені (хабарландыру үшін) |
 
 **`frontend/.env.local`**
 
-| Переменная | Назначение |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | адрес FastAPI, например `http://localhost:8000` |
+| Айнымалы | Мақсаты |
+|----------|---------|
+| `NEXT_PUBLIC_API_URL` | FastAPI мекенжайы |
 
-## Что показать на питче
+**`bot/.env`**
 
-1. Соискатель заходит на сайт, заполняет короткий профиль (город, навыки, опыт).
-2. Получает персональную ленту — AI объясняет, почему вакансия подходит.
-3. Работодатель создаёт вакансию → система автоматически ставит `risk_score` и бейдж «⚠ Проверьте».
-4. Соискатель откликается → работодатель получает push в Telegram с кнопками «Открыть контакт / Отклонить».
-5. Демо фильтров по микрорайонам Актау: Микрорайон 1–35, Koktem, Eleven, Shygys.
+| Айнымалы | Мақсаты |
+|----------|---------|
+| `BOT_TOKEN` | BotFather токені |
+| `API_URL` | FastAPI мекенжайы |
+| `APP_URL` | Веб-сайт мекенжайы |
 
-## Команда
+---
 
-Mangystau Hackathon 2026.
+## 📱 Мүмкіндіктер
 
-## Лицензия
+- ✅ Вакансиялар тізімі + іздеу + сүзгілер (қала, аудан, сала, тип, тәжірибе)
+- ✅ Тіркелу / кіру (JWT аутентификация)
+- ✅ Жұмыс іздеуші профилі + дағдылар
+- ✅ Жұмыс беруші кабинеті + вакансия жасау/өңдеу/жою
+- ✅ AI-матчинг (embedding салыстыру + түсіндірме)
+- ✅ AI вакансия мәтінін жақсарту (Gemini)
+- ✅ AI anti-scam тексеру (risk score + ескертулер)
+- ✅ Өтінім жіберу (отклик) + статус басқару
+- ✅ Телефон верификациясы (OTP)
+- ✅ Telegram-бот (@JumysAqBot) — іздеу, сүзгі, жазылу
+- ✅ Мобильді адаптация (responsive + hamburger menu)
+- ✅ REST API + Swagger құжаттамасы
+- ✅ 8 Маңғыстау қаласы + 19 демо вакансия
 
-MIT.
+---
+
+## 🎤 Демо сценарий
+
+1. **Вакансиялар тізімі** → Жаңаөзен бойынша сүзгі → нәтиже
+2. **Жұмыс беруші** → жаңа вакансия → **✨ AI текст жақсарту** → anti-scam нәтиже
+3. **Жұмыс іздеуші** → профиль → **AI-матчинг** → сәйкес вакансиялар
+4. **Telegram** → @JumysAqBot → `/start` → `/jobs`
+5. **API** → `/docs` ашу → кәсіби backend көрсету
+
+---
+
+## 🗺️ Даму жоспары
+
+| Кезең | Мерзім | Мақсат |
+|-------|--------|--------|
+| MVP ✅ | Қазір | Хакатон нұсқасы — толық жұмыс істейтін платформа |
+| Beta | Q3 2026 | SMS верификация, мобильді қосымша, аналитика |
+| Launch | Q4 2026 | ХҚО интеграциясы, монетизация, Маңғыстау пилот |
+| Scale | 2027 | Бүкіл Қазақстанға кеңейту |
+
+---
+
+## 👥 Команда
+
+Mangystau Hackathon 2026
+
+## 📄 Лицензия
+
+MIT

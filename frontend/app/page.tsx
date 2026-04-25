@@ -41,6 +41,15 @@ export default function Home() {
               >
                 Я работодатель
               </Link>
+              <a
+                href="https://t.me/JumysAqBot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn bg-[#2AABEE] text-white hover:bg-[#229ED9] px-6 py-3 text-base"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Telegram-бот
+              </a>
             </div>
           </div>
 
